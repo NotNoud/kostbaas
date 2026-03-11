@@ -80,9 +80,9 @@
                 <!-- Month view -->
                 <div id="dp-month-view" class="hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border">
-                        <button onclick="dpBackToYears()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">«</button>
-                        <span id="dp-year-label" class="font-semibold text-sm text-slate-700 dark:text-slate-200"></span>
-                        <div class="w-8"></div>
+                        <button onclick="dpPrevYear()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">‹</button>
+                        <button onclick="dpSwitchToYears()" id="dp-year-label" class="font-semibold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg px-2 py-1 transition-colors cursor-pointer"></button>
+                        <button onclick="dpNextYear()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">›</button>
                     </div>
                     <div id="dp-months-grid" class="grid grid-cols-3 gap-1 p-3"></div>
                 </div>
@@ -723,7 +723,7 @@
         if (dpOpen) {
             dpDecadeStart = Math.floor(currentYear / 10) * 10;
             dpSelectedYear = currentYear;
-            showYearView();
+            showMonthView();
         }
     }
 
@@ -782,6 +782,14 @@
         currentYear = dpSelectedYear;
         closeDatePicker();
         loadData();
+    }
+
+    function dpPrevYear() { dpSelectedYear--; renderMonths(); }
+    function dpNextYear() { dpSelectedYear++; renderMonths(); }
+
+    function dpSwitchToYears() {
+        dpDecadeStart = Math.floor(dpSelectedYear / 10) * 10;
+        showYearView();
     }
 
     function dpBackToYears() {
