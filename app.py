@@ -176,6 +176,26 @@ def add_expense():
     return jsonify({'ok': True})
 
 
+@app.route('/api/expenses/<int:eid>', methods=['PUT'])
+def update_expense(eid):
+    d = request.json
+    conn = get_db()
+    day = int(d['day_of_month']) if d.get('day_of_month') is not None else None
+    if d.get('is_percentage'):
+        conn.execute(
+            'UPDATE expenses SET name=?, amount=NULL, percentage=?, day_of_month=? WHERE id=?',
+            (d['name'], float(d['percentage']), day, eid)
+        )
+    else:
+        conn.execute(
+            'UPDATE expenses SET name=?, amount=?, percentage=NULL, day_of_month=? WHERE id=?',
+            (d['name'], float(d['amount']), day, eid)
+        )
+    conn.commit()
+    conn.close()
+    return jsonify({'ok': True})
+
+
 @app.route('/api/expenses/<int:eid>', methods=['DELETE'])
 def delete_expense(eid):
     conn = get_db()
