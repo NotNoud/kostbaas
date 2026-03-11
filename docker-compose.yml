@@ -1,7 +1,7 @@
 services:
-  vaste-lasten:
-    image: ghcr.io/notnoud/vaste-lasten:latest
-    container_name: vaste-lasten
+  kostbaas:
+    image: ghcr.io/notnoud/kostbaas:latest
+    container_name: kostbaas
     ports:
       - "5000:5000"
     volumes:

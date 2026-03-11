@@ -1,4 +1,4 @@
-# Vaste Lasten Tracker
+# Kostbaas
 
 Persoonlijke web-app om maandelijkse vaste lasten bij te houden. Het probleem: meerdere abonnementen worden op verschillende dagen afgeschreven, waardoor het onduidelijk is hoeveel er minimaal op de betaalrekening moet staan. Deze app maakt het overzichtelijk.
 
@@ -11,7 +11,7 @@ Persoonlijke web-app om maandelijkse vaste lasten bij te houden. Het probleem: m
 
 - **Vaste lasten beheren** — invoeren met naam, bedrag (of % van inkomen) en afschrijfdag
 - **Automatisch afvinken** — als de afschrijfdag al gepasseerd is, wordt de last automatisch als betaald gemarkeerd (handmatig overschrijfbaar)
-- **Maandnavigatie** — elke maand is onafhankelijk, navigeer met pijltjes
+- **Maandnavigatie** — elke maand is onafhankelijk, navigeer met pijltjes of via de datepicker
 - **Inkomen per maand** — berekent automatisch vrij besteedbaar bedrag
 - **Percentage-lasten** — bijv. "Goede doelen = 5% van inkomen", herberekent bij inkomenwijziging
 - **Scenario calculator** — voeg tijdelijke uitgaven toe om te zien wat er overblijft
@@ -28,17 +28,18 @@ Persoonlijke web-app om maandelijkse vaste lasten bij te houden. Het probleem: m
 
 ### Met Docker (aanbevolen)
 
-Kopieer dit in een `docker-compose.yml` of plak het in Dockge. Werkt op AMD64 en ARM (Raspberry Pi).
+Werkt op AMD64 en ARM (Raspberry Pi).
 
 ```yaml
+# docker-compose.yml
 services:
-  vaste-lasten:
-    image: ghcr.io/notnoud/vaste-lasten:latest
-    container_name: vaste-lasten
+  kostbaas:
+    image: ghcr.io/notnoud/kostbaas:latest
+    container_name: kostbaas
     ports:
       - "5000:5000"
     volumes:
-      - ./vaste-lasten-data:/data
+      - ./kostbaas-data:/data
     restart: unless-stopped
     environment:
       - DEBUG=false
@@ -50,15 +51,15 @@ docker compose up -d
 
 Open daarna http://localhost:5000
 
-> **Updaten:** In Dockge klik je op **Update** om de nieuwste versie te pullen. Via CLI: `docker compose pull && docker compose up -d`
+> **Updaten:** `docker compose pull && docker compose up -d`
 
-> **Data:** Je database wordt opgeslagen in `./vaste-lasten-data/expenses.db` en blijft behouden bij updates.
+> **Data:** Je database wordt opgeslagen in `./kostbaas-data/expenses.db` en blijft behouden bij updates.
 
 ### Zonder Docker
 
 ```bash
-git clone https://github.com/NotNoud/vaste-lasten.git
-cd vaste-lasten
+git clone https://github.com/NotNoud/kostbaas.git
+cd kostbaas
 pip install -r requirements.txt
 python app.py
 ```
@@ -76,7 +77,7 @@ python app.py
 ## Projectstructuur
 
 ```
-vaste-lasten/
+kostbaas/
 ├── app.py                  # Flask backend + API routes + SQLite
 ├── templates/
 │   └── index.html          # Single-page frontend (Tailwind + Vanilla JS)

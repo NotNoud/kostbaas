@@ -1,4 +1,4 @@
-# Vaste Lasten Tracker
+# Kostbaas
 
 Persoonlijke web-app om maandelijkse vaste lasten bij te houden. Het probleem dat dit oplost: meerdere abonnementen worden op verschillende dagen afgeschreven, waardoor het onduidelijk is hoeveel er minimaal op de betaalrekening moet staan. De app maakt het mogelijk om per maand lasten af te vinken en toont altijd het actuele overzicht.
 
@@ -22,7 +22,7 @@ Persoonlijke web-app om maandelijkse vaste lasten bij te houden. Het probleem da
 ## Bestandsstructuur
 
 ```
-vaste-lasten/
+kostbaas/
 ├── app.py                  # Flask backend + alle API routes + SQLite logica
 ├── templates/
 │   └── index.html          # Single-page frontend (Tailwind + Vanilla JS, AJAX)
