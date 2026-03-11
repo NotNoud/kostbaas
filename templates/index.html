@@ -44,7 +44,7 @@
 <body class="bg-slate-100 dark:bg-dark-bg min-h-screen transition-colors duration-300">
 
 <!-- Hidden elements to ensure Tailwind includes dynamic classes -->
-<div class="hidden bg-red-500 bg-violet-500 text-red-500 text-emerald-600"></div>
+<div class="hidden bg-red-500 bg-violet-500 text-red-500 text-emerald-600 opacity-40"></div>
 
 <!-- Header -->
 <header class="bg-white dark:bg-dark-card border-b border-slate-200 dark:border-dark-border sticky top-0 z-20 shadow-sm">
@@ -106,147 +106,227 @@
 
 <main class="max-w-2xl mx-auto px-4 py-5 space-y-4">
 
-    <!-- Inkomen -->
-    <div class="bg-white dark:bg-dark-surface rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-dark-border">
-        <label class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Netto inkomen deze maand</label>
-        <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-2xl text-slate-300 dark:text-slate-600 font-light">€</span>
-            <input type="number" id="income-input" step="0.01" min="0"
-                class="text-3xl font-bold text-slate-800 dark:text-slate-100 w-full focus:outline-none bg-transparent placeholder-slate-200 dark:placeholder-slate-600"
-                placeholder="0,00"
-                onblur="updateIncome()">
-        </div>
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-white dark:bg-dark-surface rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-dark-border">
+        <button onclick="switchTab('overzicht')" id="tab-overzicht"
+            class="flex-1 py-2 px-4 rounded-xl text-sm font-semibold transition-colors bg-indigo-500 text-white">
+            Overzicht
+        </button>
+        <button onclick="switchTab('tijdlijn')" id="tab-tijdlijn"
+            class="flex-1 py-2 px-4 rounded-xl text-sm font-semibold transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-hover">
+            Tijdlijn
+        </button>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-2 gap-3">
-        <div class="bg-indigo-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border">
-            <p class="text-indigo-200 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wide">Totaal lasten</p>
-            <p id="card-total" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
-        </div>
-        <div id="card-disposable-wrap" class="bg-violet-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border transition-colors duration-300">
-            <p class="text-violet-200 dark:text-violet-400 text-xs font-semibold uppercase tracking-wide" id="card-disposable-label">Vrij besteedbaar</p>
-            <p id="card-disposable" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
-        </div>
-        <div class="bg-emerald-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border">
-            <p class="text-emerald-200 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wide">Al betaald</p>
-            <p id="card-paid" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
-        </div>
-        <div class="bg-amber-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border">
-            <p class="text-amber-200 dark:text-amber-400 text-xs font-semibold uppercase tracking-wide">Nog te betalen</p>
-            <p id="card-remaining" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
-        </div>
-    </div>
+    <!-- Tab: Overzicht -->
+    <div id="content-overzicht" class="space-y-4">
 
-    <!-- Vaste Lasten Lijst -->
-    <div class="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-dark-border">
-            <h2 class="font-semibold text-slate-700 dark:text-slate-200">Vaste lasten</h2>
-            <button onclick="toggleAddForm()" id="add-btn"
-                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-3 py-1.5 rounded-xl transition-colors">
-                <span class="add-btn-icon" id="add-btn-icon">+</span> <span id="add-btn-text">Toevoegen</span>
-            </button>
-        </div>
-
-        <!-- Toevoegen Formulier -->
-        <div id="add-form" class="hidden border-b border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card p-5 fade-in">
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="col-span-2">
-                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Beschrijving *</label>
-                    <input type="text" id="new-name"
-                        placeholder="bijv. Netflix, Huur, Sportschool"
-                        class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Type bedrag</label>
-                    <select id="amount-type" onchange="toggleAmountType()"
-                        class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
-                        <option value="fixed">Vast bedrag (€)</option>
-                        <option value="percentage">% van inkomen</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Afschrijving</label>
-                    <select id="pay-mode" onchange="togglePayMode()"
-                        class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
-                        <option value="auto">Automatisch (vaste dag)</option>
-                        <option value="manual">Handmatig</option>
-                    </select>
-                </div>
-                <div id="day-field">
-                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Afschrijfdag</label>
-                    <input type="number" id="new-day" placeholder="bijv. 17" min="1" max="31"
-                        class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
-                </div>
-                <div id="amount-field" class="col-span-2">
-                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Bedrag (€) *</label>
-                    <input type="number" id="new-amount" placeholder="0.00" step="0.01" min="0"
-                        class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
-                </div>
-                <div id="pct-field" class="hidden col-span-2">
-                    <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Percentage van inkomen (%) *</label>
-                    <input type="number" id="new-percentage" placeholder="bijv. 5" step="0.1" min="0" max="100"
-                        class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="addExpense()"
-                    class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-                    Opslaan
-                </button>
-                <button onclick="toggleAddForm()"
-                    class="bg-slate-200 dark:bg-dark-border hover:bg-slate-300 dark:hover:bg-dark-hover text-slate-700 dark:text-slate-200 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-                    Annuleren
+        <!-- Inkomen -->
+        <div class="bg-white dark:bg-dark-surface rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-dark-border">
+            <label class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Netto inkomen deze maand</label>
+            <div class="flex items-baseline gap-2 mt-2">
+                <span class="text-2xl text-slate-300 dark:text-slate-600 font-light">€</span>
+                <input type="number" id="income-input" step="0.01" min="0"
+                    class="text-3xl font-bold text-slate-800 dark:text-slate-100 w-full focus:outline-none bg-transparent placeholder-slate-200 dark:placeholder-slate-600"
+                    placeholder="0,00"
+                    onblur="updateIncome()">
+                <button id="income-suggest-btn" onclick="applySuggestedIncome()"
+                    class="hidden text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 text-2xl font-bold transition-colors flex-shrink-0 px-2"
+                    title="Overnemen van vorige maand">
+                    →
                 </button>
             </div>
         </div>
 
-        <!-- Expense Items -->
-        <div id="expenses-list">
-            <div class="p-10 text-center text-slate-400 dark:text-slate-500 text-sm">
-                Nog geen vaste lasten toegevoegd.<br>
-                <span class="text-xs">Klik op "+ Toevoegen" om te beginnen.</span>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-indigo-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border">
+                <p class="text-indigo-200 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wide">Totaal lasten</p>
+                <p id="card-total" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
+            </div>
+            <div id="card-disposable-wrap" class="bg-violet-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border transition-colors duration-300">
+                <p class="text-violet-200 dark:text-violet-400 text-xs font-semibold uppercase tracking-wide" id="card-disposable-label">Vrij besteedbaar</p>
+                <p id="card-disposable" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
+            </div>
+            <div class="bg-emerald-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border">
+                <p class="text-emerald-200 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wide">Al betaald</p>
+                <p id="card-paid" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
+            </div>
+            <div class="bg-amber-500 dark:bg-dark-surface rounded-2xl p-4 text-white shadow-sm border border-transparent dark:border-dark-border">
+                <p class="text-amber-200 dark:text-amber-400 text-xs font-semibold uppercase tracking-wide">Nog te betalen</p>
+                <p id="card-remaining" class="text-2xl font-bold mt-1 tabular-nums">€ 0,00</p>
             </div>
         </div>
-    </div>
 
-    <!-- Scenario Calculator -->
-    <div class="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-200 dark:border-dark-border">
-            <h2 class="font-semibold text-slate-700 dark:text-slate-200">Scenario calculator</h2>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Wat als ik dit ook nog uitgeef?</p>
-        </div>
-        <div class="p-5 space-y-3">
-            <div id="scenario-items" class="space-y-2"></div>
-            <div class="flex gap-2">
-                <input type="text" id="scenario-desc" placeholder="Beschrijving"
-                    class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
-                <div class="flex items-center border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-slate-400 bg-white dark:bg-dark-input">
-                    <span class="pl-3 text-slate-400 dark:text-slate-500 text-sm">€</span>
-                    <input type="number" id="scenario-amount" placeholder="0" step="0.01" min="0"
-                        class="w-24 px-2 py-2 text-sm focus:outline-none bg-transparent dark:text-slate-100 dark:placeholder-slate-500">
-                </div>
-                <button onclick="addScenarioItem()"
-                    class="bg-slate-700 dark:bg-dark-border hover:bg-slate-800 dark:hover:bg-dark-hover text-white text-sm px-3 py-2 rounded-xl transition-colors font-medium">
-                    +
+        <!-- Vaste Lasten Lijst -->
+        <div class="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-dark-border">
+                <h2 class="font-semibold text-slate-700 dark:text-slate-200">Vaste lasten</h2>
+                <button onclick="toggleAddForm()" id="add-btn"
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-3 py-1.5 rounded-xl transition-colors">
+                    <span class="add-btn-icon" id="add-btn-icon">+</span> <span id="add-btn-text">Toevoegen</span>
                 </button>
             </div>
-            <div id="scenario-result" class="hidden bg-slate-50 dark:bg-dark-hover rounded-xl p-4 space-y-1.5">
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-500 dark:text-slate-400">Huidig vrij besteedbaar (inkomen - lasten)</span>
-                    <span id="sc-current" class="font-semibold text-slate-700 dark:text-slate-200"></span>
+
+            <!-- Toevoegen Formulier -->
+            <div id="add-form" class="hidden border-b border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card p-5 fade-in">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="col-span-2">
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Beschrijving *</label>
+                        <input type="text" id="new-name"
+                            placeholder="bijv. Netflix, Huur, Sportschool"
+                            class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Type bedrag</label>
+                        <select id="amount-type" onchange="toggleAmountType()"
+                            class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                            <option value="fixed">Vast bedrag (€)</option>
+                            <option value="percentage">% van inkomen</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Afschrijving</label>
+                        <select id="pay-mode" onchange="togglePayMode()"
+                            class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                            <option value="auto">Automatisch (vaste dag)</option>
+                            <option value="manual">Handmatig</option>
+                        </select>
+                    </div>
+                    <div id="day-field">
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Afschrijfdag</label>
+                        <input type="number" id="new-day" placeholder="bijv. 17" min="1" max="31"
+                            class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                    </div>
+                    <div id="amount-field" class="col-span-2">
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Bedrag (€) *</label>
+                        <input type="number" id="new-amount" placeholder="0.00" step="0.01" min="0"
+                            class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                    </div>
+                    <div id="pct-field" class="hidden col-span-2">
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Percentage van inkomen (%) *</label>
+                        <input type="number" id="new-percentage" placeholder="bijv. 5" step="0.1" min="0" max="100"
+                            class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                    </div>
+                    <!-- Actieve periode -->
+                    <div>
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Actief vanaf</label>
+                        <div class="flex gap-1 mt-1">
+                            <select id="new-active-from-month"
+                                class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                            </select>
+                            <input type="number" id="new-active-from-year" placeholder="Jaar" min="2020" max="2099"
+                                class="w-20 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Actief tot</label>
+                        <div class="flex gap-1 mt-1">
+                            <select id="new-active-until-mode" onchange="toggleNewActiveUntil()"
+                                class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                                <option value="ongoing">Doorlopend</option>
+                                <option value="fixed">Einddatum</option>
+                            </select>
+                        </div>
+                        <div id="new-active-until-fields" class="hidden flex gap-1 mt-1">
+                            <select id="new-active-until-month"
+                                class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                            </select>
+                            <input type="number" id="new-active-until-year" placeholder="Jaar" min="2020" max="2099"
+                                class="w-20 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                        </div>
+                    </div>
                 </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-500 dark:text-slate-400">Extra uitgaven</span>
-                    <span id="sc-extra" class="font-semibold text-red-500"></span>
+                <div class="flex gap-2">
+                    <button onclick="addExpense()"
+                        class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                        Opslaan
+                    </button>
+                    <button onclick="toggleAddForm()"
+                        class="bg-slate-200 dark:bg-dark-border hover:bg-slate-300 dark:hover:bg-dark-hover text-slate-700 dark:text-slate-200 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                        Annuleren
+                    </button>
                 </div>
-                <div class="flex justify-between items-baseline pt-1.5 border-t border-slate-200 dark:border-dark-border">
-                    <span class="text-slate-700 dark:text-slate-200 font-medium text-sm">Na dit scenario</span>
-                    <span id="sc-after" class="font-bold text-xl"></span>
+            </div>
+
+            <!-- Expense Items -->
+            <div id="expenses-list">
+                <div class="p-10 text-center text-slate-400 dark:text-slate-500 text-sm">
+                    Nog geen vaste lasten toegevoegd.<br>
+                    <span class="text-xs">Klik op "+ Toevoegen" om te beginnen.</span>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Scenario Calculator -->
+        <div class="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 dark:border-dark-border">
+                <h2 class="font-semibold text-slate-700 dark:text-slate-200">Scenario calculator</h2>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Wat als ik dit ook nog uitgeef?</p>
+            </div>
+            <div class="p-5 space-y-3">
+                <div id="scenario-items" class="space-y-2"></div>
+                <div class="flex gap-2">
+                    <input type="text" id="scenario-desc" placeholder="Beschrijving"
+                        class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
+                    <div class="flex items-center border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-slate-400 bg-white dark:bg-dark-input">
+                        <span class="pl-3 text-slate-400 dark:text-slate-500 text-sm">€</span>
+                        <input type="number" id="scenario-amount" placeholder="0" step="0.01" min="0"
+                            class="w-24 px-2 py-2 text-sm focus:outline-none bg-transparent dark:text-slate-100 dark:placeholder-slate-500">
+                    </div>
+                    <button onclick="addScenarioItem()"
+                        class="bg-slate-700 dark:bg-dark-border hover:bg-slate-800 dark:hover:bg-dark-hover text-white text-sm px-3 py-2 rounded-xl transition-colors font-medium">
+                        +
+                    </button>
+                </div>
+                <div id="scenario-result" class="hidden bg-slate-50 dark:bg-dark-hover rounded-xl p-4 space-y-1.5">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500 dark:text-slate-400">Huidig vrij besteedbaar (inkomen - lasten)</span>
+                        <span id="sc-current" class="font-semibold text-slate-700 dark:text-slate-200"></span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500 dark:text-slate-400">Extra uitgaven</span>
+                        <span id="sc-extra" class="font-semibold text-red-500"></span>
+                    </div>
+                    <div class="flex justify-between items-baseline pt-1.5 border-t border-slate-200 dark:border-dark-border">
+                        <span class="text-slate-700 dark:text-slate-200 font-medium text-sm">Na dit scenario</span>
+                        <span id="sc-after" class="font-bold text-xl"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content-overzicht -->
+
+    <!-- Tab: Tijdlijn -->
+    <div id="content-tijdlijn" class="hidden space-y-4">
+        <div class="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-dark-border">
+                <h2 class="font-semibold text-slate-700 dark:text-slate-200">Inkomen vs. lasten</h2>
+                <div class="flex items-center gap-1">
+                    <button onclick="timelineYear--; loadTimeline()"
+                        class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">‹</button>
+                    <span id="timeline-year-label" class="text-sm font-semibold text-slate-700 dark:text-slate-200 w-12 text-center"></span>
+                    <button onclick="timelineYear++; loadTimeline()"
+                        class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">›</button>
+                </div>
+            </div>
+            <div class="p-5">
+                <div class="flex items-center gap-4 mb-4 text-xs">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded bg-indigo-500"></div>
+                        <span class="text-slate-500 dark:text-slate-400">Inkomen</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded bg-amber-500"></div>
+                        <span class="text-slate-500 dark:text-slate-400">Lasten</span>
+                    </div>
+                </div>
+                <canvas id="timeline-chart" width="600" height="280" class="w-full" style="max-height: 280px;"></canvas>
+                <div id="chart-tooltip" class="hidden absolute bg-slate-800 dark:bg-dark-card text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-30 border border-slate-700 dark:border-dark-border"></div>
+            </div>
+        </div>
+    </div><!-- /content-tijdlijn -->
 
     <p class="text-center text-xs text-slate-400 dark:text-slate-600 pb-4">Kostbaas · lokaal opgeslagen</p>
 </main>
@@ -254,11 +334,14 @@
 <script>
     const MONTHS = ['Januari','Februari','Maart','April','Mei','Juni',
                     'Juli','Augustus','September','Oktober','November','December'];
+    const SHORT_MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
     let currentMonth = {{ default_month }};
     let currentYear = {{ default_year }};
     let currentData = null;
     let scenarioItems = [];
     let addFormVisible = false;
+    let activeTab = 'overzicht';
+    let timelineYear = {{ default_year }};
 
     const todayDay = {{ today_day }};
     const todayMonth = {{ today_month }};
@@ -268,6 +351,25 @@
     // Set today label
     document.getElementById('today-label').textContent =
         `Vandaag · ${todayDay} ${MONTHS[todayMonth - 1].toLowerCase()} ${todayYear}`;
+
+    // Populate active-from/until month selects
+    function populateMonthSelects() {
+        const selects = ['new-active-from-month', 'new-active-until-month'];
+        selects.forEach(id => {
+            const sel = document.getElementById(id);
+            sel.innerHTML = SHORT_MONTHS.map((m, i) =>
+                `<option value="${i + 1}" ${i + 1 === currentMonth ? 'selected' : ''}>${m}</option>`
+            ).join('');
+        });
+        document.getElementById('new-active-from-year').value = currentYear;
+        document.getElementById('new-active-until-year').value = currentYear;
+    }
+    populateMonthSelects();
+
+    function toggleNewActiveUntil() {
+        const mode = document.getElementById('new-active-until-mode').value;
+        document.getElementById('new-active-until-fields').classList.toggle('hidden', mode === 'ongoing');
+    }
 
     function fmt(amount) {
         const n = Math.abs(amount).toFixed(2).replace('.', ',');
@@ -291,6 +393,24 @@
         loadData();
     }
 
+    // Tabs
+    function switchTab(tab) {
+        activeTab = tab;
+        const tabs = ['overzicht', 'tijdlijn'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`tab-${t}`);
+            const content = document.getElementById(`content-${t}`);
+            if (t === tab) {
+                btn.className = 'flex-1 py-2 px-4 rounded-xl text-sm font-semibold transition-colors bg-indigo-500 text-white';
+                content.classList.remove('hidden');
+            } else {
+                btn.className = 'flex-1 py-2 px-4 rounded-xl text-sm font-semibold transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-hover';
+                content.classList.add('hidden');
+            }
+        });
+        if (tab === 'tijdlijn') loadTimeline();
+    }
+
     async function loadData() {
         updateLabel();
         const res = await fetch(`/api/data?month=${currentMonth}&year=${currentYear}`);
@@ -302,6 +422,15 @@
         // Income
         const incInput = document.getElementById('income-input');
         incInput.value = data.income > 0 ? data.income : '';
+
+        // Suggested income button
+        const suggestBtn = document.getElementById('income-suggest-btn');
+        if (data.suggested_income > 0 && data.income === 0) {
+            suggestBtn.classList.remove('hidden');
+            suggestBtn.title = `Overnemen: ${fmt(data.suggested_income)}`;
+        } else {
+            suggestBtn.classList.add('hidden');
+        }
 
         // Summary cards
         document.getElementById('card-total').textContent = fmt(data.summary.total);
@@ -330,6 +459,25 @@
         updateScenarioResult();
     }
 
+    async function applySuggestedIncome() {
+        if (!currentData || !currentData.suggested_income) return;
+        document.getElementById('income-input').value = currentData.suggested_income;
+        await updateIncome();
+    }
+
+    function formatPeriod(exp) {
+        const fromM = exp.active_from_month;
+        const fromY = exp.active_from_year;
+        const untilM = exp.active_until_month;
+        const untilY = exp.active_until_year;
+
+        if (fromM === null && untilM === null) return '';
+
+        let from = fromM !== null ? `${SHORT_MONTHS[fromM - 1].toLowerCase()} ${fromY}` : '...';
+        let until = untilM !== null ? `${SHORT_MONTHS[untilM - 1].toLowerCase()} ${untilY}` : 'heden';
+        return `${from} – ${until}`;
+    }
+
     function renderExpenses(expenses) {
         const list = document.getElementById('expenses-list');
         if (expenses.length === 0) {
@@ -342,9 +490,11 @@
         }
 
         list.innerHTML = expenses.map(exp => {
+            const isInactive = exp.inactive;
             const isPaid = exp.paid;
-            const nameClass = isPaid ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-100';
-            const amountClass = isPaid ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100';
+            const nameClass = isInactive ? 'text-slate-400 dark:text-slate-500' : isPaid ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-100';
+            const amountClass = isInactive ? 'text-slate-400 dark:text-slate-500' : isPaid ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100';
+            const rowOpacity = isInactive ? 'opacity-40' : '';
 
             const isManualExpense = exp.day_of_month === null;
             const autoBadge = exp.auto
@@ -356,10 +506,15 @@
             const manualBadge = isManualExpense
                 ? `<span class="text-xs bg-slate-100 text-slate-500 dark:bg-dark-hover dark:text-slate-400 px-1.5 py-0.5 rounded-md font-medium">handmatig</span>`
                 : '';
+            const inactiveBadge = isInactive
+                ? `<span class="text-xs bg-slate-200 text-slate-500 dark:bg-dark-border dark:text-slate-500 px-1.5 py-0.5 rounded-md font-medium">inactief</span>`
+                : '';
 
             const dayLabel = exp.day_of_month ? `dag ${exp.day_of_month}` : '';
             const pctLabel = exp.percentage !== null ? ` · ${exp.percentage}% van inkomen` : '';
-            const subLabel = (dayLabel || pctLabel) ? `${dayLabel}${pctLabel}` : '';
+            const periodLabel = formatPeriod(exp);
+            const subParts = [dayLabel + pctLabel, periodLabel].filter(Boolean);
+            const subLabel = subParts.join(' · ');
 
             const checkInner = isPaid
                 ? `<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -371,14 +526,14 @@
                 : 'w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center border-2 border-slate-300 hover:border-indigo-400 cursor-pointer transition-all';
 
             return `
-                <div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors border-b border-slate-50 dark:border-dark-border last:border-0">
+                <div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-dark-hover transition-colors border-b border-slate-50 dark:border-dark-border last:border-0 ${rowOpacity}">
                     <button onclick="togglePayment(${exp.id})" class="${checkClass}">
                         ${checkInner}
                     </button>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="font-medium text-sm ${nameClass} truncate">${escHtml(exp.name)}</span>
-                            ${autoBadge}${overriddenBadge}${manualBadge}
+                            ${autoBadge}${overriddenBadge}${manualBadge}${inactiveBadge}
                         </div>
                         ${subLabel ? `<span class="text-xs text-slate-400">${subLabel}</span>` : ''}
                     </div>
@@ -412,6 +567,61 @@
         loadData();
     }
 
+    function buildEditActiveFields(id, exp) {
+        const hasFrom = exp.active_from_month !== null;
+        const hasUntil = exp.active_until_month !== null;
+        const fromMonth = hasFrom ? exp.active_from_month : currentMonth;
+        const fromYear = hasFrom ? exp.active_from_year : currentYear;
+        const untilMonth = hasUntil ? exp.active_until_month : currentMonth;
+        const untilYear = hasUntil ? exp.active_until_year : currentYear;
+
+        const monthOpts = (selected) => SHORT_MONTHS.map((m, i) =>
+            `<option value="${i + 1}" ${i + 1 === selected ? 'selected' : ''}>${m}</option>`
+        ).join('');
+
+        return `
+            <div>
+                <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Actief vanaf</label>
+                <div class="flex gap-1 mt-1">
+                    <select id="edit-from-month-${id}" class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                        ${monthOpts(fromMonth)}
+                    </select>
+                    <input type="number" id="edit-from-year-${id}" value="${fromYear}" min="2020" max="2099"
+                        class="w-20 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Actief tot</label>
+                <div class="flex gap-1 mt-1">
+                    <select id="edit-until-mode-${id}" onchange="toggleEditActiveUntil(${id})"
+                        class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                        <option value="ongoing" ${!hasUntil ? 'selected' : ''}>Doorlopend</option>
+                        <option value="fixed" ${hasUntil ? 'selected' : ''}>Einddatum</option>
+                    </select>
+                </div>
+                <div id="edit-until-fields-${id}" class="${!hasUntil ? 'hidden' : ''} flex gap-1 mt-1">
+                    <select id="edit-until-month-${id}" class="flex-1 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                        ${monthOpts(untilMonth)}
+                    </select>
+                    <input type="number" id="edit-until-year-${id}" value="${untilYear}" min="2020" max="2099"
+                        class="w-20 border border-slate-200 dark:border-dark-border rounded-xl px-2 py-2.5 text-sm focus:outline-none bg-white dark:bg-dark-input dark:text-slate-100">
+                </div>
+            </div>
+            <!-- Inactief deze maand -->
+            <div class="col-span-2">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="edit-inactive-${id}" ${exp.inactive ? 'checked' : ''}
+                        class="w-4 h-4 rounded border-slate-300 dark:border-dark-border text-indigo-500 focus:ring-indigo-400 bg-white dark:bg-dark-input">
+                    <span class="text-sm text-slate-600 dark:text-slate-300">Inactief deze maand</span>
+                </label>
+            </div>`;
+    }
+
+    function toggleEditActiveUntil(id) {
+        const mode = document.getElementById(`edit-until-mode-${id}`).value;
+        document.getElementById(`edit-until-fields-${id}`).classList.toggle('hidden', mode === 'ongoing');
+    }
+
     function startEditExpense(id) {
         const exp = currentData.expenses.find(e => e.id === id);
         if (!exp) return;
@@ -422,12 +632,10 @@
         const row = list.querySelector(`[data-edit-id="${id}"]`);
         if (row) return; // already editing
 
-        // Find the expense row and replace with edit form
         const items = list.children;
         for (let item of items) {
             if (item.querySelector(`button[onclick="startEditExpense(${id})"]`)) {
                 item.dataset.editId = id;
-                // Reset parent classes so edit form matches add form layout
                 item.className = 'border-b border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card p-5 fade-in';
                 item.innerHTML = `
                         <div class="grid grid-cols-2 gap-3 mb-4">
@@ -467,6 +675,7 @@
                                 <input type="number" id="edit-pct-${id}" value="${isPct ? exp.percentage : ''}" placeholder="bijv. 5" step="0.1" min="0" max="100"
                                     class="mt-1 w-full border border-slate-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-dark-input dark:text-slate-100 dark:placeholder-slate-500">
                             </div>
+                            ${buildEditActiveFields(id, exp)}
                         </div>
                         <div class="flex gap-2">
                             <button onclick="saveEditExpense(${id})"
@@ -508,15 +717,32 @@
             day = Math.max(1, Math.min(31, parseInt(dayVal)));
         }
 
+        // Active period
+        const fromMonth = parseInt(document.getElementById(`edit-from-month-${id}`).value);
+        const fromYear = parseInt(document.getElementById(`edit-from-year-${id}`).value);
+        const untilMode = document.getElementById(`edit-until-mode-${id}`).value;
+
+        let activeFrom = {month: fromMonth, year: fromYear};
+        let activeUntil = null;
+        if (untilMode === 'fixed') {
+            activeUntil = {
+                month: parseInt(document.getElementById(`edit-until-month-${id}`).value),
+                year: parseInt(document.getElementById(`edit-until-year-${id}`).value)
+            };
+        }
+
+        // Inactive toggle
+        const isInactive = document.getElementById(`edit-inactive-${id}`).checked;
+
         let body;
         if (isPct) {
             const pct = parseFloat(document.getElementById(`edit-pct-${id}`).value);
             if (!pct || pct <= 0) return;
-            body = {name, day_of_month: day, is_percentage: true, percentage: pct};
+            body = {name, day_of_month: day, is_percentage: true, percentage: pct, active_from: activeFrom, active_until: activeUntil};
         } else {
             const amount = parseFloat(document.getElementById(`edit-amount-${id}`).value);
             if (!amount || amount <= 0) return;
-            body = {name, day_of_month: day, is_percentage: false, amount};
+            body = {name, day_of_month: day, is_percentage: false, amount, active_from: activeFrom, active_until: activeUntil};
         }
 
         await fetch(`/api/expenses/${id}`, {
@@ -524,6 +750,17 @@
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body)
         });
+
+        // Toggle inactive if changed
+        const exp = currentData.expenses.find(e => e.id === id);
+        if (exp && exp.inactive !== isInactive) {
+            await fetch(`/api/expenses/${id}/toggle-inactive`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({month: currentMonth, year: currentYear})
+            });
+        }
+
         loadData();
     }
 
@@ -552,6 +789,7 @@
         icon.classList.toggle('open', addFormVisible);
         text.textContent = addFormVisible ? 'Sluiten' : 'Toevoegen';
         if (addFormVisible) {
+            populateMonthSelects();
             setTimeout(() => document.getElementById('new-name').focus(), 50);
         }
     }
@@ -579,7 +817,6 @@
             return;
         }
 
-        // Bij automatisch moet er een dag ingevuld zijn
         let day = null;
         if (!isManual) {
             if (!dayVal) {
@@ -589,6 +826,20 @@
             day = Math.max(1, Math.min(31, parseInt(dayVal)));
         }
 
+        // Active period
+        const fromMonth = parseInt(document.getElementById('new-active-from-month').value);
+        const fromYear = parseInt(document.getElementById('new-active-from-year').value);
+        const untilMode = document.getElementById('new-active-until-mode').value;
+
+        let activeFrom = {month: fromMonth, year: fromYear};
+        let activeUntil = null;
+        if (untilMode === 'fixed') {
+            activeUntil = {
+                month: parseInt(document.getElementById('new-active-until-month').value),
+                year: parseInt(document.getElementById('new-active-until-year').value)
+            };
+        }
+
         let body;
         if (isPct) {
             const pct = parseFloat(document.getElementById('new-percentage').value);
@@ -596,14 +847,14 @@
                 document.getElementById('new-percentage').focus();
                 return;
             }
-            body = {name, day_of_month: day, is_percentage: true, percentage: pct};
+            body = {name, day_of_month: day, is_percentage: true, percentage: pct, active_from: activeFrom, active_until: activeUntil};
         } else {
             const amount = parseFloat(document.getElementById('new-amount').value);
             if (!amount || amount <= 0) {
                 document.getElementById('new-amount').focus();
                 return;
             }
-            body = {name, day_of_month: day, is_percentage: false, amount};
+            body = {name, day_of_month: day, is_percentage: false, amount, active_from: activeFrom, active_until: activeUntil};
         }
 
         await fetch('/api/expenses', {
@@ -617,8 +868,10 @@
             document.getElementById(id).value = '');
         document.getElementById('amount-type').value = 'fixed';
         document.getElementById('pay-mode').value = 'auto';
+        document.getElementById('new-active-until-mode').value = 'ongoing';
         toggleAmountType();
         document.getElementById('day-field').classList.remove('hidden');
+        document.getElementById('new-active-until-fields').classList.add('hidden');
         toggleAddForm();
         loadData();
     }
@@ -761,7 +1014,6 @@
     function renderMonths() {
         document.getElementById('dp-year-label').textContent = dpSelectedYear;
         const grid = document.getElementById('dp-months-grid');
-        const SHORT_MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
         grid.innerHTML = SHORT_MONTHS.map((m, i) => {
             const isCurrent = (i + 1 === currentMonth && dpSelectedYear === currentYear);
             const cls = isCurrent ? 'bg-indigo-500 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-hover';
@@ -802,6 +1054,153 @@
         if (dpOpen && !e.target.closest('#date-picker') && !e.target.closest('#month-label')) {
             closeDatePicker();
         }
+    });
+
+    // Timeline Chart
+    let timelineData = null;
+
+    async function loadTimeline() {
+        document.getElementById('timeline-year-label').textContent = timelineYear;
+        const res = await fetch(`/api/yearly?year=${timelineYear}`);
+        timelineData = await res.json();
+        drawChart();
+    }
+
+    function drawChart() {
+        if (!timelineData) return;
+        const canvas = document.getElementById('timeline-chart');
+        const ctx = canvas.getContext('2d');
+        const isDark = document.documentElement.classList.contains('dark');
+
+        // High DPI
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        const W = rect.width;
+        const H = rect.height;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const months = timelineData.months;
+        const maxVal = Math.max(...months.map(m => Math.max(m.income, m.total_expenses)), 1);
+
+        const padLeft = 55;
+        const padRight = 10;
+        const padTop = 10;
+        const padBottom = 30;
+        const chartW = W - padLeft - padRight;
+        const chartH = H - padTop - padBottom;
+
+        // Grid lines
+        const gridLines = 5;
+        ctx.strokeStyle = isDark ? '#2a2a2a' : '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= gridLines; i++) {
+            const y = padTop + (chartH / gridLines) * i;
+            const val = maxVal - (maxVal / gridLines) * i;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, y);
+            ctx.lineTo(W - padRight, y);
+            ctx.stroke();
+            ctx.fillText('€' + Math.round(val).toLocaleString('nl-NL'), padLeft - 8, y + 4);
+        }
+
+        // Bars
+        const barGroupW = chartW / 12;
+        const barW = Math.min(barGroupW * 0.3, 20);
+        const gap = 3;
+
+        // Store bar rects for hover
+        canvas._barRects = [];
+
+        months.forEach((m, i) => {
+            const x = padLeft + barGroupW * i + (barGroupW - barW * 2 - gap) / 2;
+
+            // Income bar (indigo)
+            const incH = (m.income / maxVal) * chartH;
+            const incY = padTop + chartH - incH;
+            ctx.fillStyle = '#6366f1';
+            ctx.beginPath();
+            ctx.roundRect(x, incY, barW, incH, [3, 3, 0, 0]);
+            ctx.fill();
+            canvas._barRects.push({x, y: incY, w: barW, h: incH, label: `Inkomen: ${fmt(m.income)}`, month: m.month});
+
+            // Expense bar (amber)
+            const expH = (m.total_expenses / maxVal) * chartH;
+            const expY = padTop + chartH - expH;
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.roundRect(x + barW + gap, expY, barW, expH, [3, 3, 0, 0]);
+            ctx.fill();
+            canvas._barRects.push({x: x + barW + gap, y: expY, w: barW, h: expH, label: `Lasten: ${fmt(m.total_expenses)}`, month: m.month});
+
+            // Month label
+            ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
+            ctx.textAlign = 'center';
+            ctx.font = '11px Inter, sans-serif';
+            ctx.fillText(SHORT_MONTHS[i], padLeft + barGroupW * i + barGroupW / 2, H - 8);
+        });
+    }
+
+    // Chart hover & click
+    const chartCanvas = document.getElementById('timeline-chart');
+    const chartTooltip = document.getElementById('chart-tooltip');
+
+    chartCanvas.addEventListener('mousemove', e => {
+        if (!chartCanvas._barRects) return;
+        const rect = chartCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        let found = null;
+        for (const bar of chartCanvas._barRects) {
+            if (mx >= bar.x && mx <= bar.x + bar.w && my >= bar.y && my <= bar.y + bar.h) {
+                found = bar;
+                break;
+            }
+        }
+
+        if (found) {
+            chartTooltip.classList.remove('hidden');
+            chartTooltip.textContent = found.label;
+            chartTooltip.style.left = (e.clientX + 10) + 'px';
+            chartTooltip.style.top = (e.clientY - 30) + 'px';
+            chartCanvas.style.cursor = 'pointer';
+        } else {
+            chartTooltip.classList.add('hidden');
+            chartCanvas.style.cursor = 'default';
+        }
+    });
+
+    chartCanvas.addEventListener('mouseleave', () => {
+        chartTooltip.classList.add('hidden');
+    });
+
+    chartCanvas.addEventListener('click', e => {
+        if (!chartCanvas._barRects) return;
+        const rect = chartCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        for (const bar of chartCanvas._barRects) {
+            if (mx >= bar.x && mx <= bar.x + bar.w && my >= bar.y && my <= bar.y + bar.h) {
+                currentMonth = bar.month;
+                currentYear = timelineYear;
+                switchTab('overzicht');
+                loadData();
+                return;
+            }
+        }
+    });
+
+    // Redraw chart on resize
+    window.addEventListener('resize', () => {
+        if (activeTab === 'tijdlijn' && timelineData) drawChart();
     });
 
     // Init
