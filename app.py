@@ -225,19 +225,22 @@ def toggle_payment(eid):
 
     if p is None:
         new_paid = not auto_paid
+        new_overridden = 0 if (new_paid == auto_paid) else 1
         conn.execute('''
             INSERT INTO monthly_payments (expense_id, month, year, paid, overridden)
-            VALUES (?, ?, ?, ?, 1)
-        ''', (eid, month, year, 1 if new_paid else 0))
+            VALUES (?, ?, ?, ?, ?)
+        ''', (eid, month, year, 1 if new_paid else 0, new_overridden))
     else:
         if p['overridden']:
             new_paid = not bool(p['paid'])
         else:
             new_paid = not auto_paid
+        # Als de nieuwe staat overeenkomt met auto, reset overridden
+        new_overridden = 0 if (new_paid == auto_paid) else 1
         conn.execute('''
-            UPDATE monthly_payments SET paid=?, overridden=1
+            UPDATE monthly_payments SET paid=?, overridden=?
             WHERE expense_id=? AND month=? AND year=?
-        ''', (1 if new_paid else 0, eid, month, year))
+        ''', (1 if new_paid else 0, new_overridden, eid, month, year))
 
     conn.commit()
     conn.close()

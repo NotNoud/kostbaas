@@ -37,6 +37,8 @@
         input[type=number] { -moz-appearance: textfield; }
         .fade-in { animation: fadeIn 0.15s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .add-btn-icon { transition: transform 0.25s ease; display: inline-block; }
+        .add-btn-icon.open { transform: rotate(135deg); }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-dark-bg min-h-screen transition-colors duration-300">
@@ -53,16 +55,38 @@
             <p class="text-xs text-slate-400 dark:text-slate-500" id="today-label"></p>
         </div>
         <!-- Midden: maandnavigatie -->
-        <div class="flex items-center justify-center gap-1">
+        <div class="flex items-center justify-center gap-1 relative">
             <button onclick="prevMonth()"
                 class="w-9 h-9 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl text-slate-500 dark:text-slate-400 text-xl font-light transition-colors">
                 ‹
             </button>
-            <span id="month-label" class="font-semibold text-slate-700 dark:text-slate-200 w-36 text-center text-sm"></span>
+            <button onclick="toggleDatePicker()" id="month-label"
+                class="font-semibold text-slate-700 dark:text-slate-200 w-36 text-center text-sm hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl py-1.5 transition-colors cursor-pointer"></button>
             <button onclick="nextMonth()"
                 class="w-9 h-9 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl text-slate-500 dark:text-slate-400 text-xl font-light transition-colors">
                 ›
             </button>
+            <!-- Date picker dropdown -->
+            <div id="date-picker" class="hidden absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl shadow-lg z-50 w-64 fade-in overflow-hidden">
+                <!-- Year view -->
+                <div id="dp-year-view">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border">
+                        <button onclick="dpPrevDecade()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">«</button>
+                        <span id="dp-decade-label" class="font-semibold text-sm text-slate-700 dark:text-slate-200"></span>
+                        <button onclick="dpNextDecade()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">»</button>
+                    </div>
+                    <div id="dp-years-grid" class="grid grid-cols-3 gap-1 p-3"></div>
+                </div>
+                <!-- Month view -->
+                <div id="dp-month-view" class="hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border">
+                        <button onclick="dpBackToYears()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-dark-hover rounded-lg text-slate-400 dark:text-slate-500 transition-colors">«</button>
+                        <span id="dp-year-label" class="font-semibold text-sm text-slate-700 dark:text-slate-200"></span>
+                        <div class="w-8"></div>
+                    </div>
+                    <div id="dp-months-grid" class="grid grid-cols-3 gap-1 p-3"></div>
+                </div>
+            </div>
         </div>
         <!-- Rechts: dark mode toggle -->
         <div class="flex justify-end">
@@ -118,9 +142,9 @@
     <div class="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-200 dark:border-dark-border overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-dark-border">
             <h2 class="font-semibold text-slate-700 dark:text-slate-200">Vaste lasten</h2>
-            <button onclick="toggleAddForm()"
+            <button onclick="toggleAddForm()" id="add-btn"
                 class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium px-3 py-1.5 rounded-xl transition-colors">
-                + Toevoegen
+                <span class="add-btn-icon" id="add-btn-icon">+</span> <span id="add-btn-text">Toevoegen</span>
             </button>
         </div>
 
@@ -403,8 +427,9 @@
         for (let item of items) {
             if (item.querySelector(`button[onclick="startEditExpense(${id})"]`)) {
                 item.dataset.editId = id;
+                // Reset parent classes so edit form matches add form layout
+                item.className = 'border-b border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-card p-5 fade-in';
                 item.innerHTML = `
-                    <div class="px-5 py-4 bg-slate-50 dark:bg-dark-card fade-in">
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div class="col-span-2">
                                 <label class="text-xs font-medium text-slate-500 dark:text-slate-400">Beschrijving *</label>
@@ -452,8 +477,7 @@
                                 class="bg-slate-200 dark:bg-dark-border hover:bg-slate-300 dark:hover:bg-dark-hover text-slate-700 dark:text-slate-200 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
                                 Annuleren
                             </button>
-                        </div>
-                    </div>`;
+                        </div>`;
                 break;
             }
         }
@@ -522,7 +546,11 @@
     function toggleAddForm() {
         addFormVisible = !addFormVisible;
         const form = document.getElementById('add-form');
+        const icon = document.getElementById('add-btn-icon');
+        const text = document.getElementById('add-btn-text');
         form.classList.toggle('hidden', !addFormVisible);
+        icon.classList.toggle('open', addFormVisible);
+        text.textContent = addFormVisible ? 'Sluiten' : 'Toevoegen';
         if (addFormVisible) {
             setTimeout(() => document.getElementById('new-name').focus(), 50);
         }
@@ -682,6 +710,91 @@
         if (prefersDark) document.documentElement.classList.add('dark');
         updateDarkIcon(prefersDark);
     })();
+
+    // Date Picker
+    let dpOpen = false;
+    let dpDecadeStart = Math.floor(currentYear / 10) * 10;
+    let dpSelectedYear = currentYear;
+
+    function toggleDatePicker() {
+        dpOpen = !dpOpen;
+        const el = document.getElementById('date-picker');
+        el.classList.toggle('hidden', !dpOpen);
+        if (dpOpen) {
+            dpDecadeStart = Math.floor(currentYear / 10) * 10;
+            dpSelectedYear = currentYear;
+            showYearView();
+        }
+    }
+
+    function closeDatePicker() {
+        dpOpen = false;
+        document.getElementById('date-picker').classList.add('hidden');
+    }
+
+    function showYearView() {
+        document.getElementById('dp-year-view').classList.remove('hidden');
+        document.getElementById('dp-month-view').classList.add('hidden');
+        renderYears();
+    }
+
+    function showMonthView() {
+        document.getElementById('dp-year-view').classList.add('hidden');
+        document.getElementById('dp-month-view').classList.remove('hidden');
+        renderMonths();
+    }
+
+    function renderYears() {
+        const end = dpDecadeStart + 9;
+        document.getElementById('dp-decade-label').textContent = `${dpDecadeStart} – ${end}`;
+        const grid = document.getElementById('dp-years-grid');
+        let html = '';
+        for (let y = dpDecadeStart - 1; y <= end + 1; y++) {
+            const inRange = y >= dpDecadeStart && y <= end;
+            const isCurrent = y === currentYear;
+            const textClass = !inRange ? 'text-slate-300 dark:text-slate-600' : isCurrent ? 'bg-indigo-500 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-hover';
+            html += `<button onclick="dpSelectYear(${y})" class="py-2.5 rounded-xl text-sm font-medium transition-colors ${textClass}">${y}</button>`;
+        }
+        grid.innerHTML = html;
+    }
+
+    function renderMonths() {
+        document.getElementById('dp-year-label').textContent = dpSelectedYear;
+        const grid = document.getElementById('dp-months-grid');
+        const SHORT_MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+        grid.innerHTML = SHORT_MONTHS.map((m, i) => {
+            const isCurrent = (i + 1 === currentMonth && dpSelectedYear === currentYear);
+            const cls = isCurrent ? 'bg-indigo-500 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-hover';
+            return `<button onclick="dpSelectMonth(${i + 1})" class="py-2.5 rounded-xl text-sm font-medium transition-colors ${cls}">${m}</button>`;
+        }).join('');
+    }
+
+    function dpPrevDecade() { dpDecadeStart -= 10; renderYears(); }
+    function dpNextDecade() { dpDecadeStart += 10; renderYears(); }
+
+    function dpSelectYear(y) {
+        dpSelectedYear = y;
+        showMonthView();
+    }
+
+    function dpSelectMonth(m) {
+        currentMonth = m;
+        currentYear = dpSelectedYear;
+        closeDatePicker();
+        loadData();
+    }
+
+    function dpBackToYears() {
+        dpDecadeStart = Math.floor(dpSelectedYear / 10) * 10;
+        showYearView();
+    }
+
+    // Sluit datepicker bij klik buiten
+    document.addEventListener('click', e => {
+        if (dpOpen && !e.target.closest('#date-picker') && !e.target.closest('#month-label')) {
+            closeDatePicker();
+        }
+    });
 
     // Init
     updateLabel();
