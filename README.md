@@ -26,33 +26,14 @@ Persoonlijke web-app om maandelijkse vaste lasten bij te houden. Het probleem: m
 
 ## Snel starten
 
-### Met Docker Compose (aanbevolen)
+### Met Docker (aanbevolen)
 
-```bash
-git clone https://github.com/NotNoud/vaste-lasten.git
-cd vaste-lasten
-docker compose up -d
-```
-
-Open daarna http://localhost:5000
-
-### Zonder Docker
-
-```bash
-git clone https://github.com/NotNoud/vaste-lasten.git
-cd vaste-lasten
-pip install -r requirements.txt
-python app.py
-```
-
-## Dockge / Raspberry Pi
-
-Kopieer onderstaande compose config in Dockge. Werkt op zowel AMD64 als ARM (Raspberry Pi).
+Kopieer dit in een `docker-compose.yml` of plak het in Dockge. Werkt op AMD64 en ARM (Raspberry Pi).
 
 ```yaml
 services:
   vaste-lasten:
-    build: https://github.com/NotNoud/vaste-lasten.git
+    image: ghcr.io/notnoud/vaste-lasten:latest
     container_name: vaste-lasten
     ports:
       - "5000:5000"
@@ -63,9 +44,24 @@ services:
       - DEBUG=false
 ```
 
-> **Tip:** De `build:` regel haalt automatisch de repo op en bouwt de image. Bij een update: klik in Dockge op **Rebuild** om de nieuwste versie te pullen.
+```bash
+docker compose up -d
+```
 
-> **Data:** Je database wordt opgeslagen in `./vaste-lasten-data/expenses.db`. Deze map blijft bestaan bij container-updates.
+Open daarna http://localhost:5000
+
+> **Updaten:** In Dockge klik je op **Update** om de nieuwste versie te pullen. Via CLI: `docker compose pull && docker compose up -d`
+
+> **Data:** Je database wordt opgeslagen in `./vaste-lasten-data/expenses.db` en blijft behouden bij updates.
+
+### Zonder Docker
+
+```bash
+git clone https://github.com/NotNoud/vaste-lasten.git
+cd vaste-lasten
+pip install -r requirements.txt
+python app.py
+```
 
 ## Tech stack
 

@@ -1,6 +1,7 @@
 services:
   vaste-lasten:
-    build: .
+    image: ghcr.io/notnoud/vaste-lasten:latest
+    container_name: vaste-lasten
     ports:
       - "5000:5000"
     volumes:
