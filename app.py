@@ -30,7 +30,7 @@ def init_db():
             name         TEXT    NOT NULL,
             amount       REAL,
             percentage   REAL,
-            day_of_month INTEGER DEFAULT 1
+            day_of_month INTEGER DEFAULT NULL
         );
 
         CREATE TABLE IF NOT EXISTS monthly_payments (
@@ -80,7 +80,7 @@ def get_data():
     income = inc['amount'] if inc else 0
 
     expenses_rows = conn.execute(
-        'SELECT * FROM expenses ORDER BY day_of_month, name'
+        'SELECT * FROM expenses ORDER BY day_of_month IS NULL, day_of_month, name'
     ).fetchall()
 
     payments = {p['expense_id']: p for p in conn.execute(
@@ -101,8 +101,12 @@ def get_data():
         else:
             amount = exp['amount'] or 0
 
-        day = exp['day_of_month'] or 1
-        auto_paid = is_current and day <= today.day
+        day = exp['day_of_month']
+        # day_of_month NULL = handmatige last, nooit auto-afvinken
+        if day is not None:
+            auto_paid = is_current and day <= today.day
+        else:
+            auto_paid = False
 
         if p and p['overridden']:
             paid = bool(p['paid'])
@@ -156,15 +160,16 @@ def update_income():
 def add_expense():
     d = request.json
     conn = get_db()
+    day = int(d['day_of_month']) if d.get('day_of_month') is not None else None
     if d.get('is_percentage'):
         conn.execute(
             'INSERT INTO expenses (name, percentage, day_of_month) VALUES (?, ?, ?)',
-            (d['name'], float(d['percentage']), int(d.get('day_of_month', 1)))
+            (d['name'], float(d['percentage']), day)
         )
     else:
         conn.execute(
             'INSERT INTO expenses (name, amount, day_of_month) VALUES (?, ?, ?)',
-            (d['name'], float(d['amount']), int(d.get('day_of_month', 1)))
+            (d['name'], float(d['amount']), day)
         )
     conn.commit()
     conn.close()
@@ -194,9 +199,9 @@ def toggle_payment(eid):
     ).fetchone()
 
     exp = conn.execute('SELECT day_of_month FROM expenses WHERE id=?', (eid,)).fetchone()
-    day = exp['day_of_month'] or 1
+    day = exp['day_of_month']
     is_current = (month == today.month and year == today.year)
-    auto_paid = is_current and day <= today.day
+    auto_paid = day is not None and is_current and day <= today.day
 
     if p is None:
         new_paid = not auto_paid
